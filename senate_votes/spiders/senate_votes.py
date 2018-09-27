@@ -11,27 +11,7 @@ import unidecode
 
 ### -------- Define all custom fxns here -------- ###
 
-# Need a fxn to pull correct pol IDs
-# Input is a dictionary of first_name, last_name, party, and state
-def find_pol_id(dic):
-    print(dic) ###formula checkpoint
-    try:
-        pol_id = pols_df[(pols_df['first_name'] == dic['first_name']) & 
-                         (pols_df['last_name'] == dic['last_name']) &
-                         (pols_df['party'] == dic['party']) &
-                         (pols_df['state'] == dic['state'])].iloc[0,0]
-    except Exception: 
-        pol_id = ValueError
-    return pol_id;
-
-# Need a fxn to clean names
-# Normalize policicians' nicknames for database
-def fix_nickname(fn):
-    if fn in list(names_df['nickname']):
-        full_name = names_df[names_df['nickname'] == fn].iloc[0,1]
-        return full_name
-    else:
-        return fn;
+### -------- Start of spider -------- ###
 
 class SenateVotesSpider(scrapy.Spider):
     name = 'senate_votes'
