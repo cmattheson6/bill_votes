@@ -5,46 +5,9 @@ import scrapy
 from datetime import datetime
 from datetime import date
 from selenium import webdriver
-import psycopg2
 import pandas as pd
 import re
 import unidecode
-
-### -------- Pull all needed tables from database -------- ###
-# Connect to the database
-
-hostname = "localhost"
-username = "postgres"
-password = "postgres"
-database = "politics"
-
-conn = psycopg2.connect(host = hostname,
-                        user = username,
-                        password = password,
-                        dbname = database)
-cur = conn.cursor()
-
-# Import a DF of politician info for mapping
-select_query = """SELECT id, first_name, last_name, party, state from politicians
-                  ORDER BY id ASC"""
-cur.execute(select_query)
-pols_df = pd.DataFrame(list(cur))
-pols_df.columns = ['id', 'first_name', 'last_name', 'party', 'state']
-
-# Import a DF of nicknames for name mapping
-select_query = """SELECT nickname, full_name from nicknames"""
-cur.execute(select_query)
-names_df = pd.DataFrame(list(cur))
-names_df.columns = ["nickname", "full_name"]
-
-# Select the last date that there was a vote in my database
-select_query = "select max(vote_date) from all_votes"
-cur.execute(select_query)
-last_vote_date = list(cur)[0]
-
-# Close connections
-cur.close()
-conn.close()
 
 ### -------- Define all custom fxns here -------- ###
 
