@@ -33,48 +33,12 @@ def fix_nickname(fn):
     else:
         return fn;
 
-# Normalize a politicians' full name to allow for normalized mapping
-def scrub_fname(s):
-    if len(re.findall(r'[A-Z]\.', s)) == 1:
-        u = unidecode.unidecode(s)
-        v = re.sub(r' [A-Z]\.', '', u) #remove middle initials
-        w = re.sub(r' \".*\"', '', v) #remove nicknames
-        x = re.sub(r' (Sr.|Jr.|III|IV)', '', w) #remove suffixes
-        y = re.sub(r'\,', '', x) #remove stray commas
-        z = y.strip() #remove excess whitespace
-        return fix_nickname(z);
-    else:
-        u = unidecode.unidecode(s)
-        v = re.sub(r'\".*\"', '', u) #remove nicknames
-        w = re.sub(r' (Sr.|Jr.|III|IV)', '', v) #remove suffixes
-        x = re.sub(r'\,', '', w) #remove stray commas
-        y = x.strip() #remove excess whitespace
-        return fix_nickname(y);
-def scrub_lname(s):
-    if len(re.findall(r'[A-Z]\.', s)) == 1:
-        u = unidecode.unidecode(s)
-        v = re.sub(r' [A-Z]\.', '', u) #remove middle initials
-        w = re.sub(r' \".*\"', '', v) #remove nicknames
-        x = re.sub(r' (Sr.|Jr.|III|IV)', '', w) #remove suffixes
-        y = re.sub(r'\,', '', x) #remove stray commas
-        z = y.strip() #remove excess whitespace
-        return z;
-    else:
-        u = unidecode.unidecode(s)
-        v = re.sub(r'\".*\"', '', u) #remove nicknames
-        w = re.sub(r' (Sr.|Jr.|III|IV)', '', v) #remove suffixes
-        x = re.sub(r'\,', '', w) #remove stray commas
-        y = x.strip() #remove excess whitespace
-        return y;
-    
-
 class SenateVotesSpider(scrapy.Spider):
     name = 'senate_votes'
     
     def start_requests(self):
         start_urls = ["https://www.senate.gov/legislative/LIS/roll_call_lists/vote_menu_115_2.htm",
                       "https://www.senate.gov/legislative/LIS/roll_call_lists/vote_menu_115_1.htm"]
-        start_url = ["https://www.senate.gov/legislative/LIS/roll_call_lists/roll_call_vote_cfm.cfm?congress=115&session=2&vote=00178"]
         # Start the parsing request
         for u in start_urls:
             yield scrapy.Request(url = u, callback = self.parse_all_bills) #replace with each parse to test
@@ -143,16 +107,6 @@ class SenateVotesSpider(scrapy.Spider):
             state = i.xpath(".//state/text()").extract_first()
             # All parties parse
             party = i.xpath(".//party/text()").extract_first()
-            # Clean first and last names of pol (don't need to keep any removed data)
-            fname = scrub_fname(fname)
-            lname = scrub_lname(lname)
-            # Reorganize above four lists to be politician dictionaries (for next formula)
-            pol_dict = {'first_name': fname,
-                        'last_name': lname,
-                        'state': state,
-                        'party': party}
-            # Find pol ID formula (as list comprehension)
-            pol_id = find_pol_id(pol_dict)
             # Pull all votes cast
             vote_cast = i.xpath(".//vote_cast/text()").extract_first()
             # Repurpose Yea as 1, Nay as 0, anything else as None
@@ -165,7 +119,10 @@ class SenateVotesSpider(scrapy.Spider):
             # Build out an individual dict for each vote and yield that
             vote_dict = {'bill_num': bill_num,
                          'amendment_num': amendment_num,
-                         'pol_id': pol_id,
+                         'pol_fn': fname,
+                         'pol_ln': lname,
+                         'pol_party': party,
+                         'pol_state': state,
                          'vote_cast': vote_cast,
                          'vote_date': vote_date,
                          'house': 'SN',
