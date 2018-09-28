@@ -11,6 +11,7 @@ import unidecode
 # Set date for yesterday's bills that are published
 date_yesterday = date.today() - timedelta(days=1)
 # Sets the year of yesterday's bills
+this_year = date_yesterday.year
 
 ### -------- Start of spider -------- ###    
 
@@ -18,7 +19,7 @@ class HouseVotesSpider(scrapy.Spider):
     name = 'house_votes'
     
     def start_requests(self):
-        start_urls = ["http://clerk.house.gov/evs/2018/index.asp"]
+        start_urls = ["http://clerk.house.gov/evs/{0}/index.asp".format(this_year)]
         
         # Start the parsing request
         for u in start_urls:
