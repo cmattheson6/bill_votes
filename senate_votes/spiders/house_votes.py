@@ -2,123 +2,17 @@
 
 ### -------- Import all of the necessary files -------- ###
 import scrapy
-from datetime import datetime
+from datetime import datetime, timedelta
 from datetime import date
-from selenium import webdriver
-import psycopg2
 import pandas as pd
 import re
 import unidecode
 
-### -------- Pull all needed tables from database -------- ###
-# Connect to the database
+# Set date for yesterday's bills that are published
+date_yesterday = date.today() - timedelta(days=1)
+# Sets the year of yesterday's bills
 
-hostname = "localhost"
-username = "postgres"
-password = "postgres"
-database = "politics"
-
-conn = psycopg2.connect(host = hostname,
-                        user = username,
-                        password = password,
-                        dbname = database)
-cur = conn.cursor()
-
-# Import a DF of politician info for mapping
-select_query = """SELECT id, first_name, last_name, party, state from politicians
-                  ORDER BY id ASC"""
-cur.execute(select_query)
-pols_df = pd.DataFrame(list(cur))
-pols_df.columns = ['id', 'first_name', 'last_name', 'party', 'state']
-# THIS MAY NEED TO CHANGE DUE TO NOT HAVING FIRST NAMES
-
-# Import a DF of nicknames for name mapping
-select_query = """SELECT nickname, full_name from nicknames"""
-cur.execute(select_query)
-names_df = pd.DataFrame(list(cur))
-names_df.columns = ["nickname", "full_name"]
-
-# Select the last date that there was a vote in my database
-select_query = "select max(vote_date) from all_votes"
-cur.execute(select_query)
-last_vote_date = list(cur)[0]
-
-# Get all states for mapping states to authors
-select_query = """SELECT * from state_map"""
-cur.execute(select_query)
-states_df = pd.DataFrame(list(cur))
-states_df.columns = ["state", "initials"]
-
-# Close connections
-cur.close()
-conn.close()
-
-### -------- Define all custom fxns here -------- ###
-
-# Need a fxn to pull correct pol IDs
-# Input is a dictionary of first_name, last_name, party, and state
-def find_pol_id(dic): # THIS FORMULA MAY NEED TO CHANGE DUE TO NO FIRST NAME
-    try:
-        pol_id = pols_df[(pols_df['last_name'] == dic['last_name']) &
-                         (pols_df['party'] == dic['party']) &
-                         (pols_df['state'] == dic['state'])].iloc[0,0]
-    except Exception: 
-        pol_id = ValueError
-    return pol_id;
-
-# Need a fxn to clean names
-# Normalize policicians' nicknames for database
-def fix_nickname(fn):
-    if fn in list(names_df['nickname']):
-        full_name = names_df[names_df['nickname'] == fn].iloc[0,1]
-        return full_name
-    else:
-        return fn;
-
-# Normalize a politicians' full name to allow for normalized mapping
-def scrub_fname(s):
-    if len(re.findall(r'[A-Z]\.', s)) == 1:
-        u = unidecode.unidecode(s)
-        v = re.sub(r' [A-Z]\.', '', u) #remove middle initials
-        w = re.sub(r' \".*\"', '', v) #remove nicknames
-        x = re.sub(r' (Sr.|Jr.|III|IV)', '', w) #remove suffixes
-        y = re.sub(r' \(.*\)', '', x) #remove any parentheses
-        z = re.sub(r'\,', '', y) #remove stray commas
-        a = z.strip() #remove excess whitespace
-        return fix_nickname(a);
-    else:
-        u = unidecode.unidecode(s)
-        v = re.sub(r'\".*\"', '', u) #remove nicknames
-        w = re.sub(r' (Sr.|Jr.|III|IV)', '', v) #remove suffixes
-        x = re.sub(r' \(.*\)', '', w) #removes any parentheses
-        y = re.sub(r'\,', '', x) #remove stray commas
-        z = y.strip() #remove excess whitespace
-        return fix_nickname(z);
-def scrub_lname(s):
-    if len(re.findall(r'[A-Z]\.', s)) == 1:
-        u = unidecode.unidecode(s)
-        v = re.sub(r' [A-Z]\.', '', u) #remove middle initials
-        w = re.sub(r' \".*\"', '', v) #remove nicknames
-        x = re.sub(r' (Sr.|Jr.|III|IV)', '', w) #remove suffixes
-        y = re.sub(r' \(.*\)', '', x) #removes any parentheses
-        z = re.sub(r',.*', '', y) #remove anything after a comma
-        a = re.sub(r'\,', '', z) #remove stray commas
-        b = a.strip() #remove excess whitespace
-        return b;
-    else:
-        u = unidecode.unidecode(s)
-        v = re.sub(r'\".*\"', '', u) #remove nicknames
-        w = re.sub(r' (Sr.|Jr.|III|IV)', '', v) #remove suffixes
-        x = re.sub(r' \(.*\)', '', w) #removes any parentheses
-        y = re.sub(r',.*', '', x) #remove anything after a comma
-        z = re.sub(r'\,', '', y) #remove stray commas
-        a = z.strip() #remove excess whitespace
-        return a;
-# This is to clean bill names to a normalized state
-def clean_bill(x):
-    bill = x.replace(" ", "").replace(".", "").upper()
-    return bill;
-    
+### -------- Start of spider -------- ###    
 
 class HouseVotesSpider(scrapy.Spider):
     name = 'house_votes'
@@ -141,7 +35,6 @@ class HouseVotesSpider(scrapy.Spider):
         roll_call_votes = response.xpath(".//table/tr")#[0:10] #remove this limiter
         roll_call_votes = roll_call_votes[1:len(roll_call_votes)]
         bill_vote_dicts = []
-        date_today = date.today()
         for i in roll_call_votes:
             vote_url = i.xpath(".//a/@href").re_first("^.*rollnumber.*$")
             print(vote_url)
@@ -151,7 +44,7 @@ class HouseVotesSpider(scrapy.Spider):
             bill_date = i.xpath(".//text()").extract()[2]
             bill_date = bill_date + ", " + str(date.today().year)
             bill_date = datetime.strptime(bill_date, "%d-%b, %Y").date()
-            if bill_date == date_today:
+            if bill_date >= date_yesterday:
                 request = scrapy.Request(url = vote_url, 
                                  callback = self.parse_votes)
                 request.meta['bill_url'] = bill_url
