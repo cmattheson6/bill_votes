@@ -65,4 +65,4 @@ class SenateVotesPipeline(object):
         
         print("We published! WOOOO!")
         
-        return item
+        return item;
