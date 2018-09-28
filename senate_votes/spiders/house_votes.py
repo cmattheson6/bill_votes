@@ -33,7 +33,7 @@ class HouseVotesSpider(scrapy.Spider):
             yield scrapy.Request(url = url, callback = self.parse_all_bills);
     def parse_all_bills(self, response): # THIS MAY NO LONGER REDIRECT TO XMLS BUT TO VOTE PAGE; EXTRA STEP NEEDED
         # Go to the XML link on this page
-        roll_call_votes = response.xpath(".//table/tr")#[0:10] #remove this limiter
+        roll_call_votes = response.xpath(".//table/tr")
         roll_call_votes = roll_call_votes[1:len(roll_call_votes)]
         bill_vote_dicts = []
         for i in roll_call_votes:
@@ -117,19 +117,11 @@ class HouseVotesSpider(scrapy.Spider):
         vote_list = []
         for i in response.xpath(".//recorded-vote"):
             # All last names parse
-            lname = i.xpath(".//legislator/@unaccented-name").extract_first()
+            pol_ln = i.xpath(".//legislator/@unaccented-name").extract_first()
             # All states parse
-            state = i.xpath(".//legislator/@state").extract_first()
+            pol_state = i.xpath(".//legislator/@state").extract_first()
             # All parties parse
-            party = i.xpath(".//legislator/@party").extract_first()
-            # Clean first and last names of pol (don't need to keep any removed data)
-            lname = scrub_lname(lname)
-            # Reorganize above four lists to be politician dictionaries (for next formula)
-            pol_dict = {'last_name': lname,
-                        'state': state,
-                        'party': party}
-            # Find pol ID formula (as list comprehension)
-            pol_id = find_pol_id(pol_dict) # NEED TO FIX THIS FOR FXN TO WORK
+            pol_party = i.xpath(".//legislator/@party").extract_first()
             # Pull all votes cast
             vote_cast = i.xpath(".//vote/text()").extract_first()
             # Repurpose Yea as 1, Nay as 0, anything else as None
@@ -142,7 +134,9 @@ class HouseVotesSpider(scrapy.Spider):
             # Build out an individual dict for each vote and yield that
             vote_dict = {'bill_id': bill_id,
                          'amendment_id': amendment_id,
-                         'pol_id': pol_id,
+                         'pol_ln': pol_ln,
+                         'pol_party': pol_party,
+                         'pol_party': pol_party,
                          'vote_cast': vote_cast,
                          'vote_date': vote_date,
                          'house': 'HR',
