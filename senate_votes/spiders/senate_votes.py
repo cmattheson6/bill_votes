@@ -62,7 +62,7 @@ class SenateVotesSpider(scrapy.Spider):
             bill_num = response.xpath(".//amendment/amendment_to_document_number/text()")\
             .extract_first().replace(" ", "").replace(".", "")
         else:
-            return ValueError;
+            yield ValueError;
         # Pull vote date and process it for proper formatting
         vote_date = response.xpath(".//vote_date/text()").extract_first()
         vote_date = datetime.strptime(vote_date, "%B %d, %Y, %I:%M %p")
@@ -74,7 +74,7 @@ class SenateVotesSpider(scrapy.Spider):
         except Exception:
             amendment_num = None
         else:
-            return ValueError;
+            yield ValueError;
         if amendment_num == "":
             amendment_num = None;
         # See if I need any exceptions or conditions w/ test
