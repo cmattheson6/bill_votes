@@ -32,7 +32,9 @@ class SenateVotesSpider(scrapy.Spider):
             bill_url = i.xpath(".//td/a/@href").re_first("^.*vote=.*$")
             # Check the date of the URL
             bill_date = i.xpath(".//td/text()").extract()
-            bill_date = bill_date[len(bill_date)-1] + ", " + str(date.today().year)
+            bill_date = bill_date[len(bill_date)-1]
+            bill_Date = bill_date.replace("\xa[0-9]*", "")
+            bill_date = bill_date + ", " + str(date.today().year)
             bill_date = datetime.strptime(bill_date, "%b %d, %Y")
             bill_date = bill_date.date()
             date_today = date.today()
