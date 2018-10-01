@@ -96,8 +96,8 @@ class HouseVotesSpider(scrapy.Spider):
             bill_id = clean_bill(response.xpath(".//legis-num/text()").extract_first())
         except Exception:
             bill_id = clean_bill(response.xpath(".//amendment/amendment_to_document_number/text()").extract_first())
-        else:
-            raise ValueError;
+#         else:
+#             raise ValueError;
         # THE CURRENT SETUP FOR FINDING THE BILL NUM WILL NOT WORK
         # FIRST, PULL THE BILL NUMBER AS IS
         # IF AMENDMENT APPEARS IN THE VOTE QUESTION, THERE IS A DIFFERENT PROCESS
