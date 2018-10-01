@@ -105,7 +105,7 @@ class HouseVotesSpider(scrapy.Spider):
         elif len(response.xpath(".//amendment-num/text()").extract()) == 1:
             amdt_num = int(response.xpath(".//amendment-num/text()").extract_first())  
         else:
-            return ValueError;
+            yield ValueError;
         
         amendment_id = None
         # Pull vote date and process it for proper formatting
@@ -141,22 +141,21 @@ class HouseVotesSpider(scrapy.Spider):
                          'vote_date': vote_date,
                          'house': 'HR',
                          'state': 'US'}
-            yield vote_dict
             #send each dict to the pipeline
             vote_list.append(vote_dict);
-#         if amdt_num == None:
-#             yield vote_list
-#             print("There was no amendment")
-#             print(vote_list[0:4])
-#         elif amdt_num > 0:
-#             request = scrapy.Request(url = bill_url,
-#                                      callback = self.parse_amendment,
-#                                      dont_filter = True)
-#             request.meta['amdt_num'] = amdt_num
-#             request.meta['vote_list'] = vote_list
-#             print("We found an amendment!")
-#             yield request
-#         else:
-#             return ValueError;
+        if amdt_num == None:
+            yield vote_list
+            print("There was no amendment")
+            print(vote_list[0:4])
+        elif amdt_num > 0:
+            request = scrapy.Request(url = bill_url,
+                                     callback = self.parse_amendment,
+                                     dont_filter = True)
+            request.meta['amdt_num'] = amdt_num
+            request.meta['vote_list'] = vote_list
+            print("We found an amendment!")
+            yield request
+        else:
+            yield ValueError;
 
     
