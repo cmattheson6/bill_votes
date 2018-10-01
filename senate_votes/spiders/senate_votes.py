@@ -9,6 +9,10 @@ import unidecode
 
 ### -------- Define all custom fxns here -------- ###
 
+def clean_bill(x):
+    bill = x.replace(" ", "").replace(".", "").upper()
+    return bill;
+
 ### -------- Start of spider -------- ###
 
 class SenateVotesSpider(scrapy.Spider):
@@ -54,11 +58,9 @@ class SenateVotesSpider(scrapy.Spider):
         # Parse out all of the necessary information from the vote
         # Bill num parse
         try:
-            bill_num = response.xpath(".//document/document_name/text()")\
-            .extract_first().replace(" ", "").replace(".", "")
+            bill_num = clean_bill(response.xpath(".//document/document_name/text()").extract_first())
         except Exception:
-            bill_num = response.xpath(".//amendment/amendment_to_document_number/text()")\
-            .extract_first().replace(" ", "").replace(".", "")
+            bill_num = clean_bill(response.xpath(".//amendment/amendment_to_document_number/text()").extract_first()
         else:
             raise ValueError;
         # Pull vote date and process it for proper formatting
@@ -67,8 +69,7 @@ class SenateVotesSpider(scrapy.Spider):
         vote_date = vote_date.date()
         # Parse amendment number
         try:
-            amendment_num = response.xpath(".//amendment/amendment_number/text()").\
-            extract_first().replace(" ", "").replace(".", "")
+            amendment_num = clean_bill(response.xpath(".//amendment/amendment_number/text()").extract_first()
         except Exception:
             amendment_num = None
         else:
