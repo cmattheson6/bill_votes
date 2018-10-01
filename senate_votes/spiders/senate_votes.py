@@ -72,7 +72,7 @@ class SenateVotesSpider(scrapy.Spider):
         except Exception:
             amendment_num = None
         else:
-            yield ValueError;
+            raise ValueError;
         if amendment_num == "":
             amendment_num = None;
         # See if I need any exceptions or conditions w/ test
