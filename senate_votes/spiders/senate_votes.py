@@ -5,7 +5,6 @@ import scrapy
 from datetime import datetime
 from datetime import date
 from selenium import webdriver
-import pandas as pd
 import re
 import unidecode
 
