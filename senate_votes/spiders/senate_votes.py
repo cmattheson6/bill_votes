@@ -4,7 +4,6 @@
 import scrapy
 from datetime import datetime
 from datetime import date
-from selenium import webdriver
 import re
 import unidecode
 
