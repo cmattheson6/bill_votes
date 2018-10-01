@@ -12,6 +12,12 @@ date_yesterday = date.today() - timedelta(days=1)
 # Sets the year of yesterday's bills
 this_year = date_yesterday.year
 
+### -------- All reusable formulas are listed here -------- ###  
+
+def clean_bill(x):
+    bill = x.replace(" ", "").replace(".", "").upper()
+    return bill;
+
 ### -------- Start of spider -------- ###    
 
 class HouseVotesSpider(scrapy.Spider):
