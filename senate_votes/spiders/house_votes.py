@@ -91,7 +91,7 @@ class HouseVotesSpider(scrapy.Spider):
         except Exception:
             bill_id = clean_bill(response.xpath(".//amendment/amendment_to_document_number/text()").extract_first())
         else:
-            ValueError;
+            raise ValueError;
         # THE CURRENT SETUP FOR FINDING THE BILL NUM WILL NOT WORK
         # FIRST, PULL THE BILL NUMBER AS IS
         # IF AMENDMENT APPEARS IN THE VOTE QUESTION, THERE IS A DIFFERENT PROCESS
@@ -104,7 +104,7 @@ class HouseVotesSpider(scrapy.Spider):
         elif len(response.xpath(".//amendment-num/text()").extract()) == 1:
             amdt_num = int(response.xpath(".//amendment-num/text()").extract_first())  
         else:
-            yield ValueError;
+            raise ValueError;
         
         amendment_id = None
         # Pull vote date and process it for proper formatting
@@ -155,6 +155,6 @@ class HouseVotesSpider(scrapy.Spider):
             print("We found an amendment!")
             yield request
         else:
-            yield ValueError;
+            raise ValueError;
 
     
