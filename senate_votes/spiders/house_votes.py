@@ -87,7 +87,8 @@ class HouseVotesSpider(scrapy.Spider):
             for i in vote_list:
                 i['amendment_id'] = amdt_id
             print(vote_list[0:4])
-            yield i for i in vote_list
+            for i in vote_list:
+                yield i;
 #         print(vote_list); #parse the amendment number at index amdt_num;                                 
     def parse_votes(self, response): #bill_url = 'https://www.congress.gov/bill/115th-congress/house-bill/2851/amendments?pageSort=asc'): #'https://www.congress.gov/bill/115th-congress/house-bill/2851/amendments?pageSort=asc'
         # parses out bill id from xml
@@ -149,7 +150,8 @@ class HouseVotesSpider(scrapy.Spider):
             #send each dict to the pipeline
             vote_list.append(vote_dict);
         if amdt_num == None:
-            yield i for i in vote_list
+            for i in vote_list:
+                yield i;
             print("There was no amendment")
             print(vote_list[0:4])
         elif amdt_num > 0:
