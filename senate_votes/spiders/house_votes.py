@@ -4,7 +4,6 @@
 import scrapy
 from datetime import datetime, timedelta
 from datetime import date
-import pandas as pd
 import re
 import unidecode
 
