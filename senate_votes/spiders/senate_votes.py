@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-### ***NEED TO ADD IN CODE FOR FILTERING DATES
-
 
 ### -------- Import all of the necessary files -------- ###
 import scrapy
