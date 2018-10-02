@@ -16,6 +16,9 @@ def clean_bill(x):
     bill = x.replace(" ", "").replace(".", "").upper()
     return bill;
 
+# Set date for yesterday's bills that are published
+date_yesterday = date.today() - timedelta(days=1)
+
 ### -------- Start of spider -------- ###
 
 class SenateVotesSpider(scrapy.Spider):
@@ -40,13 +43,10 @@ class SenateVotesSpider(scrapy.Spider):
             bill_date = bill_date + ", " + str(date.today().year)
             bill_date = datetime.strptime(bill_date, "%b %d, %Y")
             bill_date = bill_date.date()
-            date_today = date.today()
-            all_bill_urls.append(bill_url) #WILL EVENTUALLY BE ELIMINATED
-            # If the date is not today, do not add it
-#             if bill_date == date_today:
-#                 all_bill_urls.append(bill_url)
-#             else:
-#                 pass;
+            if bill_date >= date_yesterday:
+                all_bill_urls.append(bill_url)
+            else:
+                all_bill_urls.append(bill_url); #CHANGE THIS TO PASS WHEN I ONLY WANT THE MOST CURRENT BILLS
         # Pass all links to the next parsing request
         for u in all_bill_urls:
             url = response.urljoin(u)
