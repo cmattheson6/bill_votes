@@ -24,14 +24,14 @@ class HouseVotesSpider(scrapy.Spider):
     name = 'house_votes'
     
     def start_requests(self):
-        start_urls = ["http://clerk.house.gov/evs/{0}/index.asp".format(this_year)]
+        start_urls = ['http://clerk.house.gov/evs/{0}/index.asp'.format(this_year)]
         
         # Start the parsing request
         for u in start_urls:
             yield scrapy.Request(url = u, callback = self.parse_roll_calls)
     def parse_roll_calls(self, response):
         # Pull all links to the votes from this page
-        all_roll_urls = response.xpath(".//a/@href").re("^.*ROLL.*$")
+        all_roll_urls = response.xpath('.//a/@href').re('^.*ROLL.*$')
         # Pass all links to the next parsing request
         for u in all_roll_urls:
             url = response.urljoin(u)
