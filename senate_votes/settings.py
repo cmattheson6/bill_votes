@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from scrapy.settings.default_settings import DUPEFILTER_CLASS
 
-# Scrapy settings for senate_votes project
+# Scrapy settings for bill_votes project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -10,13 +10,13 @@ from scrapy.settings.default_settings import DUPEFILTER_CLASS
 #     https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'senate_votes'
+BOT_NAME = 'bill_votes'
 
-SPIDER_MODULES = ['senate_votes.spiders']
-NEWSPIDER_MODULE = 'senate_votes.spiders'
+SPIDER_MODULES = ['bill_votes.spiders']
+NEWSPIDER_MODULE = 'bill_votes.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'senate_votes (+http://www.yourdomain.com)'
+#USER_AGENT = 'bill_votes (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
@@ -47,13 +47,13 @@ DOWNLOAD_DELAY = 1
 # Enable or disable spider middlewares
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
-#    'senate_votes.middlewares.SenateVotesSpiderMiddleware': 543,
+#    'bill_votes.middlewares.SenateVotesSpiderMiddleware': 543,
 #}
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 #DOWNLOADER_MIDDLEWARES = {
-#    'senate_votes.middlewares.SenateVotesDownloaderMiddleware': 543,
+#    'bill_votes.middlewares.SenateVotesDownloaderMiddleware': 543,
 #}
 
 # Enable or disable extensions
@@ -65,7 +65,7 @@ DOWNLOAD_DELAY = 1
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-#     'senate_votes.pipelines.SenateVotesPipeline': 300,
+    'bill_votes.pipelines.BillVotesPipeline': 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

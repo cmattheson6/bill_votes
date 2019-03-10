@@ -1,26 +1,20 @@
-# -*- coding: utf-8 -*-
+"""
+This pipeline will upload all items from the spiders to the proper Pub/Sub topic.
+The rest of the processing will take place in Dataflow.
+"""
 
-# Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-
-### -------- Import all of the necessary files -------- ###
-import scrapy
 from google.cloud import pubsub
 from google.oauth2 import service_account
-import subprocess
-import scrapy
-import scrapy.crawler
-from scrapy.utils.project import get_project_settings
-import google.auth
+import logging
 
-### -------- Start of pipeline -------- ###
-
-class SenateVotesPipeline(object):
+class BillVotesPipeline(object):
 
     def process_item(self, item, spider):
-        
+        """We need to establish a an authorized connection to Google Cloud in order to upload to Google Pub/Sub.
+        In order to host the spiders on Github, the service account credentials are housed on the Scrapy platform
+        and dynamically created in the script."""
+
+        # Pull all of the credential info from the Scrapy platform into a dictionary.
         cred_dict = {
                          "auth_provider_x509_cert_url": spider.settings.get('auth_provider_x509_cert_url'),
                          "auth_uri": spider.settings.get('auth_uri'),
@@ -33,25 +27,24 @@ class SenateVotesPipeline(object):
                          "token_uri": spider.settings.get('token_uri'),
                          "type": spider.settings.get('account_type')
              }
+        logging.info('Credentials downloaded from Scrapy server.')
         cred_dict['private_key'] = cred_dict['private_key'].replace('\\n', '\n')
-        print(cred_dict)
 
+        # Build a Credentials object from the above dictionary. This will properly allow access as part of a
+        # Google Cloud Client.
         credentials = service_account.Credentials.from_service_account_info(cred_dict)
-        print(credentials)
-        print("I haven't set up the client yet, but I built the credentials!")
-        publisher = pubsub.PublisherClient(credentials = credentials)
-        print(publisher)
-        print("The client was set up!")
+        logging.info('Credentials object created.')
 
-        topic = 'projects/{project_id}/topics/{topic}'.format(
-             project_id='politics-data-tracker-1',
-             topic='bill_votes')
+        # Create Publisher client.
+        publisher = pubsub.PublisherClient(credentials = credentials)
+        logging.info('Publisher Client created.')
+
+        # Set location of proper publisher topic
         project_id = 'politics-data-tracker-1'
         topic_name = 'bill_votes'
         topic_path = publisher.topic_path(project_id, topic_name)
-        data = u'This is a representative in the House.'
+        data = u'This is a representative in the House.' #Consider how to better use this.
         data = data.encode('utf-8')
-        print("The topic was built!")
         publisher.publish(topic_path, data=data,
                           bill_id = str(item['bill_id']),
                           amdt_id = str(item['amdt_id']),
@@ -62,7 +55,7 @@ class SenateVotesPipeline(object):
                           vote_date = str(item['vote_date']),
                           house = str(item['house']),
                           state = str(item['state']))
+
+        logging.info('Published item: {0}'.format(item))
         
-        print("We published! WOOOO!")
-        
-        return item;
+        yield item
