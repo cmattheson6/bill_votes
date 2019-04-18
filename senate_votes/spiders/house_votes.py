@@ -7,6 +7,7 @@ current voting lists up-to-date.
 from datetime import datetime, timedelta
 from datetime import date
 import logging
+import scrapy
 
 # Set date for yesterday's bills that are published
 date_yesterday = date.today() - timedelta(days=1)
